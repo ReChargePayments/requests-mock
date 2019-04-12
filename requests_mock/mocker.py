@@ -11,6 +11,7 @@
 # under the License.
 
 import functools
+import warnings
 
 import requests
 
@@ -137,7 +138,8 @@ class MockerCore(object):
         if specific_matchers:
             for matcher in specific_matchers:
                 if not matcher.called and not matcher._real_http:
-                    raise exceptions.UncalledMockedAddressException(matcher)
+                    warnings.warn("Mocked address %s %s but never called" % (
+                                  matcher._method, matcher._url))
 
     def __getattr__(self, name):
         if name in self._PROXY_FUNCS:

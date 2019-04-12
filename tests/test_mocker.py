@@ -13,6 +13,7 @@
 import mock
 import pytest
 import requests
+import warnings
 
 import requests_mock
 from requests_mock import exceptions
@@ -59,8 +60,11 @@ class MockerTests(base.TestCase):
                 mocked_call = m.get("http://www.zombo.com")
                 assert 0 == mocked_call.call_count
 
-        self.assertRaises(exceptions.UncalledMockedAddressException,
-                          uncalled_testcase)
+        with warnings.catch_warnings(record=True) as warns:
+            uncalled_testcase()
+        self.assertEqual(1, len(warns))
+        self.assertEqual("Mocked address GET http://www.zombo.com but never called",
+                         str(warns[0].message))
 
     @mock.patch('requests.adapters.HTTPAdapter.send')
     @requests_mock.mock(real_http=True)
